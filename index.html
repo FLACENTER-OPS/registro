@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro dos Carros — Florida Auto Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0f0f0f;--bg2:#161616;--bg3:#1e1e1e;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#f0ede8;--text2:#888;--text3:#555;
+  --accent:#c8ff00;--accent2:#00d4aa;
+  --red:#ff4444;--amber:#ffaa00;--blue:#4499ff;--purple:#aa88ff;
+  --mono:'DM Mono',monospace;--sans:'Sora',sans-serif;--radius:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* HEADER */
+.header{border-bottom:1px solid var(--border);padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;background:rgba(15,15,15,0.92);backdrop-filter:blur(12px);z-index:100}
+.logo{font-family:var(--mono);font-size:13px;color:var(--text2);letter-spacing:.08em;display:flex;align-items:center;gap:10px}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.header-actions{display:flex;gap:8px;align-items:center}
+
+/* BUTTONS */
+.btn{font-family:var(--mono);font-size:11px;letter-spacing:.05em;padding:7px 14px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--text2);color:var(--text)}
+.btn.primary{background:var(--accent);color:#0f0f0f;border-color:transparent;font-weight:500}
+.btn.primary:hover{background:#d9ff1a}
+
+/* SETUP BANNER */
+.setup-banner{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.setup-banner label{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:.06em;white-space:nowrap}
+.setup-banner input{flex:1;min-width:280px;font-family:var(--mono);font-size:12px;padding:7px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);transition:border-color .15s}
+.setup-banner input:focus{outline:none;border-color:var(--accent)}
+.setup-banner input::placeholder{color:var(--text3)}
+.setup-saved{font-family:var(--mono);font-size:11px;color:var(--accent2);letter-spacing:.04em;display:none}
+
+/* STATS */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--border)}
+.stat-cell{padding:20px 28px;border-right:1px solid var(--border)}
+.stat-cell:last-child{border-right:none}
+.stat-label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--text3);text-transform:uppercase;margin-bottom:6px}
+.stat-num{font-family:var(--mono);font-size:28px;font-weight:500;color:var(--text);line-height:1}
+.stat-num.danger{color:var(--red)}
+.stat-num.ok{color:var(--accent2)}
+
+/* FILTERS */
+.filters-bar{padding:12px 28px;border-bottom:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap}
+.filter-chip{font-family:var(--mono);font-size:11px;letter-spacing:.04em;padding:5px 12px;border-radius:999px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;transition:all .15s}
+.filter-chip:hover{color:var(--text2);border-color:var(--text3)}
+.filter-chip.active{background:var(--accent);color:#0f0f0f;border-color:transparent;font-weight:500}
+
+/* MAIN */
+.main{padding:20px 28px;max-width:1100px;margin:0 auto}
+.card-list{display:flex;flex-direction:column;gap:10px}
+
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;transition:border-color .2s;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:transparent;transition:background .2s}
+.card.dp-hold::before{background:var(--amber)}
+.card.followup-alert::before{background:var(--red)}
+.card.manual-card::before{background:var(--purple)}
+.card:hover{border-color:var(--border2)}
+
+.card-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:12px}
+.car-name{font-family:var(--mono);font-size:14px;font-weight:500;color:var(--text);letter-spacing:.02em}
+.deal-meta{font-size:11px;color:var(--text3);margin-top:3px;font-family:var(--mono)}
+.badges{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.badge{font-family:var(--mono);font-size:10px;letter-spacing:.06em;padding:3px 8px;border-radius:4px;font-weight:500}
+.b-new   {background:rgba(0,212,170,.12);color:var(--accent2);border:1px solid rgba(0,212,170,.2)}
+.b-trans {background:rgba(68,153,255,.12);color:var(--blue);border:1px solid rgba(68,153,255,.2)}
+.b-cash  {background:rgba(200,255,0,.10);color:var(--accent);border:1px solid rgba(200,255,0,.2)}
+.b-fin   {background:rgba(170,136,255,.12);color:var(--purple);border:1px solid rgba(170,136,255,.2)}
+.b-dp    {background:rgba(255,170,0,.12);color:var(--amber);border:1px solid rgba(255,170,0,.2)}
+.b-block {background:rgba(255,68,68,.12);color:var(--red);border:1px solid rgba(255,68,68,.2)}
+.b-manual{background:rgba(170,136,255,.12);color:var(--purple);border:1px solid rgba(170,136,255,.2)}
+.b-fu    {background:rgba(255,68,68,.12);color:var(--red);border:1px solid rgba(255,68,68,.2)}
+
+/* TOGGLE GRID */
+.toggle-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.toggle-block{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px}
+.toggle-block-label{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--text3);text-transform:uppercase;margin-bottom:8px}
+.toggle-row{display:flex;gap:4px;flex-wrap:wrap}
+.tog{font-family:var(--mono);font-size:10px;letter-spacing:.04em;padding:4px 8px;border-radius:5px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;transition:all .12s;white-space:nowrap}
+.tog:hover{color:var(--text2);border-color:var(--text2)}
+.tog.s-presente   {background:rgba(0,212,170,.15);color:var(--accent2);border-color:rgba(0,212,170,.3)}
+.tog.s-ausente    {background:rgba(255,68,68,.15);color:var(--red);border-color:rgba(255,68,68,.3)}
+.tog.s-eletronic  {background:rgba(170,136,255,.15);color:var(--purple);border-color:rgba(170,136,255,.3)}
+.tog.s-sim        {background:rgba(0,212,170,.15);color:var(--accent2);border-color:rgba(0,212,170,.3)}
+.tog.s-nao        {background:rgba(255,68,68,.15);color:var(--red);border-color:rgba(255,68,68,.3)}
+.tog.s-pendente   {background:rgba(255,68,68,.15);color:var(--red);border-color:rgba(255,68,68,.3)}
+.tog.s-aseparar   {background:rgba(255,170,0,.15);color:var(--amber);border-color:rgba(255,170,0,.3)}
+.tog.s-readytogo  {background:rgba(200,255,0,.15);color:var(--accent);border-color:rgba(200,255,0,.3)}
+.tog.s-despachante{background:rgba(68,153,255,.15);color:var(--blue);border-color:rgba(68,153,255,.3)}
+.tog.s-done       {background:rgba(0,212,170,.15);color:var(--accent2);border-color:rgba(0,212,170,.3)}
+
+/* FOLLOW-UP ROW */
+.fu-row{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;flex-wrap:wrap}
+.fu-label{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--text3);text-transform:uppercase}
+.fu-input{width:48px;font-family:var(--mono);font-size:12px;padding:4px 6px;border-radius:5px;border:1px solid var(--border2);background:var(--bg);color:var(--text);text-align:center}
+.fu-alert{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--red);letter-spacing:.04em}
+
+/* OBS */
+.obs-row{display:flex;gap:8px;align-items:flex-end}
+.obs-input{flex:1;font-family:var(--sans);font-size:12px;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);resize:none;height:40px;transition:border-color .15s;line-height:1.5}
+.obs-input::placeholder{color:var(--text3)}
+.obs-input:focus{outline:none;border-color:var(--border2);color:var(--text)}
+.save-btn{font-family:var(--mono);font-size:10px;letter-spacing:.06em;padding:8px 12px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;transition:all .15s;white-space:nowrap;height:40px}
+.save-btn:hover{color:var(--text);border-color:var(--text3)}
+.save-btn.saved{color:var(--accent2);border-color:rgba(0,212,170,.3)}
+.save-btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* DOCS */
+.docs-section{margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.docs-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.docs-header-label{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--text3);text-transform:uppercase}
+.docs-pct{font-family:var(--mono);font-size:11px;color:var(--text2)}
+.prog-track{height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-bottom:6px}
+.prog-fill{height:100%;border-radius:2px;transition:width .4s ease}
+.prog-fill.ok{background:var(--accent2)}
+.prog-fill.warn{background:var(--amber)}
+.prog-fill.danger{background:var(--red)}
+.doc-pills{display:flex;flex-wrap:wrap;gap:3px}
+.doc-pill{font-family:var(--mono);font-size:9px;letter-spacing:.04em;padding:2px 7px;border-radius:4px;background:rgba(255,68,68,.1);color:rgba(255,68,68,.7);border:1px solid rgba(255,68,68,.15)}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:24px;width:100%;max-width:500px;animation:slideUp .2s ease}
+@keyframes slideUp{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-title{font-family:var(--mono);font-size:13px;letter-spacing:.06em;color:var(--text);margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.modal-title::before{content:'';display:block;width:8px;height:8px;border-radius:2px;background:var(--purple)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.field label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--text3);text-transform:uppercase;margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%;font-family:var(--sans);font-size:13px;padding:8px 10px;border-radius:8px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);transition:border-color .15s}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent)}
+.field select{cursor:pointer}
+.field textarea{resize:none;height:60px}
+.field.full{grid-column:1/-1}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+
+/* LOADING */
+.loading-bar{height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);background-size:200% 100%;animation:shimmer 1.2s infinite;display:none}
+.loading-bar.active{display:block}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
+/* TOAST */
+.toast-container{position:fixed;bottom:20px;right:20px;z-index:300;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.toast{font-family:var(--mono);font-size:12px;letter-spacing:.04em;padding:10px 16px;border-radius:8px;background:var(--bg2);border:1px solid var(--border2);color:var(--text2);display:flex;align-items:center;gap:8px;opacity:0;transform:translateY(8px);transition:all .2s;max-width:300px}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.toast .dot.ok{background:var(--accent2)}
+.toast .dot.warn{background:var(--amber)}
+.toast .dot.danger{background:var(--red)}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:60px 20px;font-family:var(--mono);color:var(--text3);font-size:12px;letter-spacing:.06em}
+.empty-state .big{font-size:32px;margin-bottom:12px;opacity:.3}
+
+@media(max-width:700px){
+  .stats-bar{grid-template-columns:repeat(2,1fr)}
+  .stat-cell{padding:14px 16px}
+  .header,.filters-bar,.main,.setup-banner{padding-left:16px;padding-right:16px}
+  .toggle-grid{grid-template-columns:1fr 1fr}
+  .form-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="loading-bar" id="loading-bar"></div>
+
+<header class="header">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    FLACENTER · REGISTRO
+  </div>
+  <div class="header-actions">
+    <button class="btn" onclick="loadAll()">↺ Atualizar</button>
+    <button class="btn primary" onclick="showModal()">+ Lançar manual</button>
+  </div>
+</header>
+
+<!-- SETUP BANNER -->
+<div class="setup-banner" id="setup-banner">
+  <label>SCRIPT URL</label>
+  <input id="script-url-input" type="text" placeholder="Cole aqui a URL do Apps Script após o deploy..." />
+  <button class="btn primary" onclick="saveScriptUrl()">Salvar</button>
+  <span class="setup-saved" id="setup-saved">✓ URL salva</span>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-cell"><div class="stat-label">Total</div><div class="stat-num" id="s-total">—</div></div>
+  <div class="stat-cell"><div class="stat-label">Título ausente</div><div class="stat-num danger" id="s-ausente">—</div></div>
+  <div class="stat-cell"><div class="stat-label">Ready to go</div><div class="stat-num ok" id="s-ready">—</div></div>
+  <div class="stat-cell"><div class="stat-label">Follow-up vencido</div><div class="stat-num danger" id="s-fu">—</div></div>
+</div>
+
+<div class="filters-bar">
+  <button class="filter-chip active" onclick="setFilter('all',this)">Todos</button>
+  <button class="filter-chip" onclick="setFilter('ausente',this)">Título ausente</button>
+  <button class="filter-chip" onclick="setFilter('followup',this)">Follow-up vencido</button>
+  <button class="filter-chip" onclick="setFilter('dp',this)">DP parcelado</button>
+  <button class="filter-chip" onclick="setFilter('pendente',this)">Pendentes</button>
+  <button class="filter-chip" onclick="setFilter('readytogo',this)">Ready to go</button>
+  <button class="filter-chip" onclick="setFilter('manual',this)">Manuais</button>
+</div>
+
+<div class="main">
+  <div class="card-list" id="card-list">
+    <div class="empty-state"><div class="big">◌</div>Configure o Script URL acima para começar.</div>
+  </div>
+</div>
+
+<!-- MODAL LANÇAMENTO MANUAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-title">Lançar carro manualmente</div>
+    <div class="form-grid">
+      <div class="field"><label>Deal ID</label><input id="m-dealid" placeholder="ex: 3750" /></div>
+      <div class="field"><label>Veículo</label><input id="m-veiculo" placeholder="ex: 2019 Ford F-150" /></div>
+      <div class="field"><label>Vendedor</label><input id="m-vendedor" placeholder="ex: Antonio" /></div>
+      <div class="field"><label>Emplacamento</label>
+        <select id="m-emp"><option value="New Tag">New Tag</option><option value="Transfer">Transfer</option></select>
+      </div>
+      <div class="field"><label>Financiamento</label>
+        <select id="m-fin">
+          <option value="Cash">Cash</option><option value="Financed">Financed</option>
+          <option value="BHPH">BHPH</option><option value="Westlake">Westlake</option>
+          <option value="LendBuzz">LendBuzz</option><option value="Strike">Strike</option>
+        </select>
+      </div>
+      <div class="field"><label>DP parcelado?</label>
+        <select id="m-dp"><option value="nao">Não</option><option value="sim">Sim</option></select>
+      </div>
+      <div class="field"><label>Título</label>
+        <select id="m-titulo"><option value="ausente">Ausente</option><option value="presente">Presente</option><option value="eletronic">Eletrônico</option></select>
+      </div>
+      <div class="field"><label>Data de entrada</label><input type="date" id="m-data" /></div>
+      <div class="field full"><label>Obs inicial</label><textarea id="m-obs" placeholder="Qualquer anotação..."></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="hideModal()">Cancelar</button>
+      <button class="btn primary" onclick="addManual()">Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+let SCRIPT_URL = localStorage.getItem('flac_script_url') || '';
+let deals    = [];
+let docs     = {};
+let registro = {};
+let filter   = 'all';
+
+// ─── SETUP ────────────────────────────────────────────────────────────────────
+function initSetupBanner() {
+  const banner = document.getElementById('setup-banner');
+  const input  = document.getElementById('script-url-input');
+  if (SCRIPT_URL) {
+    input.value = SCRIPT_URL;
+    banner.style.display = 'none';
+  }
+}
+
+function saveScriptUrl() {
+  const val = document.getElementById('script-url-input').value.trim();
+  if (!val) { toast('Cole a URL do Apps Script', 'warn'); return; }
+  SCRIPT_URL = val;
+  localStorage.setItem('flac_script_url', val);
+  document.getElementById('setup-banner').style.display = 'none';
+  document.getElementById('setup-saved').style.display = 'inline';
+  toast('URL salva! Carregando...', 'ok');
+  loadAll();
+}
+
+// ─── LOCAL STORAGE ────────────────────────────────────────────────────────────
+function loadLocal() {
+  try { registro = JSON.parse(localStorage.getItem('flac_registro') || '{}'); } catch(e) {}
+}
+function saveLocal() {
+  try { localStorage.setItem('flac_registro', JSON.stringify(registro)); } catch(e) {}
+}
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+function toast(msg, type='ok') {
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerHTML = `<div class="dot ${type}"></div><span>${msg}</span>`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.classList.add('show'), 30);
+  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 3200);
+}
+
+// ─── LOADING ──────────────────────────────────────────────────────────────────
+function setLoading(on) {
+  document.getElementById('loading-bar').classList.toggle('active', on);
+}
+
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+function diasDesde(dateStr) {
+  if (!dateStr) return 0;
+  return Math.floor((Date.now() - new Date(dateStr)) / 86400000);
+}
+function getR(dealId, field, def) {
+  return registro[dealId]?.[field] ?? def;
+}
+function setR(dealId, field, val) {
+  if (!registro[dealId]) registro[dealId] = {};
+  registro[dealId][field] = val;
+  saveLocal();
+  updateStats();
+}
+function isFollowUpVencido(dealId) {
+  if (getR(dealId,'titulo','ausente') !== 'ausente') return false;
+  return diasDesde(getR(dealId,'dataEntrada','')) >= parseInt(getR(dealId,'followUpDias','7'));
+}
+
+// ─── STATS ────────────────────────────────────────────────────────────────────
+function updateStats() {
+  document.getElementById('s-total').textContent   = deals.length;
+  document.getElementById('s-ausente').textContent = deals.filter(d => getR(d.dealId,'titulo','ausente') === 'ausente').length;
+  document.getElementById('s-ready').textContent   = deals.filter(d => getR(d.dealId,'processo','') === 'readytogo').length;
+  document.getElementById('s-fu').textContent      = deals.filter(d => isFollowUpVencido(d.dealId)).length;
+}
+
+// ─── FILTER ───────────────────────────────────────────────────────────────────
+function setFilter(f, btn) {
+  filter = f;
+  document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCards();
+}
+function filteredDeals() {
+  return deals.filter(d => {
+    if (filter === 'all')       return true;
+    if (filter === 'ausente')   return getR(d.dealId,'titulo','ausente') === 'ausente';
+    if (filter === 'dp')        return d.parcelado === 'sim';
+    if (filter === 'pendente')  return getR(d.dealId,'processo','pendente') === 'pendente';
+    if (filter === 'readytogo') return getR(d.dealId,'processo','') === 'readytogo';
+    if (filter === 'manual')    return d.manual === true;
+    if (filter === 'followup')  return isFollowUpVencido(d.dealId);
+    return true;
+  });
+}
+
+// ─── TOGGLES ──────────────────────────────────────────────────────────────────
+function togHtml(dealId, field, options) {
+  const cur = getR(dealId, field, options[0]);
+  return options.map(o => {
+    const slug = o.toLowerCase().replace(/\s+/g,'');
+    return `<button class="tog ${cur===o?'s-'+slug:''}" onclick="setR('${dealId}','${field}','${o}');renderCards()">${o}</button>`;
+  }).join('');
+}
+
+// ─── DOC PROGRESS ─────────────────────────────────────────────────────────────
+function docProgress(dealId) {
+  const d = docs[dealId] || [];
+  if (!d.length) return { pct:0, pending:[], ok:0, total:0 };
+  const ok = d.filter(x => x.status === 'ok').length;
+  return { pct: Math.round((ok/d.length)*100), pending: d.filter(x=>x.status!=='ok').map(x=>x.doc), ok, total:d.length };
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function renderCards() {
+  const list = document.getElementById('card-list');
+  const fd   = filteredDeals();
+  if (!fd.length) {
+    list.innerHTML = `<div class="empty-state"><div class="big">◌</div>Nenhum deal com esse filtro.</div>`;
+    updateStats(); return;
+  }
+  list.innerHTML = fd.map(d => {
+    const titulo   = getR(d.dealId,'titulo','ausente');
+    const gps      = getR(d.dealId,'gps','nao');
+    const processo = getR(d.dealId,'processo','pendente');
+    const obs      = getR(d.dealId,'obs','');
+    const fuDias   = getR(d.dealId,'followUpDias','7');
+    const fuVenc   = isFollowUpVencido(d.dealId);
+    const diasAus  = diasDesde(getR(d.dealId,'dataEntrada',''));
+    const prog     = docProgress(d.dealId);
+    const fc       = prog.pct>=80?'ok':prog.pct>=50?'warn':'danger';
+    const pendDocs = (prog.pending||[]).slice(0,5);
+    const cardCls  = d.manual?'manual-card':fuVenc?'followup-alert':d.parcelado==='sim'?'dp-hold':'';
+
+    return `<div class="card ${cardCls}">
+  <div class="card-head">
+    <div>
+      <div class="car-name">${d.veiculo}</div>
+      <div class="deal-meta">#${d.dealId} · ${d.vendedor}</div>
+    </div>
+    <div class="badges">
+      <span class="badge ${d.emplacamento==='New Tag'?'b-new':'b-trans'}">${d.emplacamento==='New Tag'?'NEW':'TRANSFER'}</span>
+      <span class="badge ${d.financiamento==='Cash'?'b-cash':'b-fin'}">${d.financiamento}</span>
+      ${d.parcelado==='sim'?'<span class="badge b-dp">DP PARC</span>':''}
+      ${d.status==='bloqueado'?'<span class="badge b-block">BLOQUEADO</span>':''}
+      ${d.manual?'<span class="badge b-manual">MANUAL</span>':''}
+      ${fuVenc&&titulo==='ausente'?`<span class="badge b-fu">AUSENTE ${diasAus}d</span>`:''}
+    </div>
+  </div>
+  <div class="toggle-grid">
+    <div class="toggle-block">
+      <div class="toggle-block-label">Título</div>
+      <div class="toggle-row">${togHtml(d.dealId,'titulo',['presente','ausente','eletronic'])}</div>
+    </div>
+    <div class="toggle-block">
+      <div class="toggle-block-label">GPS</div>
+      <div class="toggle-row">${togHtml(d.dealId,'gps',['sim','nao'])}</div>
+    </div>
+    <div class="toggle-block">
+      <div class="toggle-block-label">Processo</div>
+      <div class="toggle-row">${togHtml(d.dealId,'processo',['pendente','aseparar','readytogo','despachante','done'])}</div>
+    </div>
+  </div>
+  <div class="fu-row">
+    <span class="fu-label">Follow-up após</span>
+    <input type="number" class="fu-input" min="1" max="90" value="${fuDias}"
+      onchange="setR('${d.dealId}','followUpDias',this.value);renderCards()">
+    <span class="fu-label">dias sem título</span>
+    ${fuVenc?'<span class="fu-alert">⚑ Cobrar título agora</span>':''}
+  </div>
+  <div class="obs-row">
+    <textarea class="obs-input" id="obs-${d.dealId}" placeholder="Obs: faltando algo, aguardando...">${obs}</textarea>
+    <button class="save-btn" id="savebtn-${d.dealId}" onclick="saveCard('${d.dealId}')">salvar</button>
+  </div>
+  ${prog.total>0?`<div class="docs-section">
+    <div class="docs-header">
+      <span class="docs-header-label">Docs F&amp;I</span>
+      <span class="docs-pct">${prog.pct}% · ${prog.ok}/${prog.total}</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill ${fc}" style="width:${prog.pct}%"></div></div>
+    ${pendDocs.length?`<div class="doc-pills">${pendDocs.map(doc=>`<span class="doc-pill">${doc.replace(' — Impresso','').replace(' — DC',' DC')}</span>`).join('')}${prog.pending.length>5?`<span class="doc-pill">+${prog.pending.length-5}</span>`:''}</div>`:''}
+  </div>`:''}
+</div>`;
+  }).join('');
+  updateStats();
+}
+
+// ─── SAVE CARD ────────────────────────────────────────────────────────────────
+async function saveCard(dealId) {
+  if (!SCRIPT_URL) { toast('Configure o Script URL primeiro', 'warn'); return; }
+  const obsEl = document.getElementById(`obs-${dealId}`);
+  if (obsEl) setR(dealId, 'obs', obsEl.value);
+  saveLocal();
+
+  const btn = document.getElementById(`savebtn-${dealId}`);
+  if (btn) { btn.textContent = '...'; btn.disabled = true; }
+
+  const d   = deals.find(x => x.dealId === dealId) || {};
+  const reg = registro[dealId] || {};
+
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'saveRegistro',
+        data: {
+          DealID:       dealId,
+          Veiculo:      d.veiculo      || '',
+          Vendedor:     d.vendedor     || '',
+          Emplacamento: d.emplacamento || '',
+          Financiamento:d.financiamento|| '',
+          Parcelado:    d.parcelado    || 'nao',
+          Titulo:       reg.titulo     || 'ausente',
+          GPS:          reg.gps        || 'nao',
+          Processo:     reg.processo   || 'pendente',
+          Obs:          reg.obs        || '',
+          FollowUpDias: reg.followUpDias|| '7',
+          DataEntrada:  reg.dataEntrada || new Date().toISOString().split('T')[0],
+          Manual:       d.manual ? 'sim' : 'nao'
+        }
+      })
+    });
+    await res.json();
+    if (btn) { btn.textContent = '✓ salvo'; btn.classList.add('saved'); btn.disabled = false; }
+    setTimeout(() => { if(btn){btn.textContent='salvar';btn.classList.remove('saved');} }, 2500);
+    toast(`Deal #${dealId} salvo`);
+  } catch(e) {
+    if (btn) { btn.textContent = 'salvar'; btn.disabled = false; }
+    toast('Erro ao salvar', 'danger');
+  }
+}
+
+// ─── MODAL ────────────────────────────────────────────────────────────────────
+function showModal() {
+  document.getElementById('modal-overlay').classList.add('open');
+  document.getElementById('m-data').value = new Date().toISOString().split('T')[0];
+}
+function hideModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+document.getElementById('modal-overlay').addEventListener('click', function(e) { if(e.target===this)hideModal(); });
+
+async function addManual() {
+  const dealId  = document.getElementById('m-dealid').value.trim();
+  const veiculo = document.getElementById('m-veiculo').value.trim();
+  if (!dealId || !veiculo) { toast('Preencha Deal ID e Veículo', 'warn'); return; }
+  if (deals.find(d => d.dealId === dealId)) { toast('Deal ID já existe', 'warn'); return; }
+
+  const dataEntrada = document.getElementById('m-data').value || new Date().toISOString().split('T')[0];
+  deals.unshift({
+    dealId, veiculo,
+    vendedor:     document.getElementById('m-vendedor').value || '—',
+    emplacamento: document.getElementById('m-emp').value,
+    financiamento:document.getElementById('m-fin').value,
+    parcelado:    document.getElementById('m-dp').value,
+    status:'manual', manual:true
+  });
+  registro[dealId] = {
+    titulo:      document.getElementById('m-titulo').value,
+    gps:'nao', processo:'pendente',
+    obs:         document.getElementById('m-obs').value,
+    followUpDias:'7', dataEntrada
+  };
+  saveLocal();
+  hideModal();
+  renderCards();
+  toast(`${veiculo} adicionado`);
+  await saveCard(dealId);
+}
+
+// ─── LOAD ALL ─────────────────────────────────────────────────────────────────
+async function loadAll() {
+  if (!SCRIPT_URL) {
+    document.getElementById('card-list').innerHTML =
+      `<div class="empty-state"><div class="big">◌</div>Cole a URL do Apps Script no campo acima para começar.</div>`;
+    return;
+  }
+  setLoading(true);
+  document.getElementById('card-list').innerHTML =
+    `<div class="empty-state"><div class="big">◌</div>Carregando deals...</div>`;
+  try {
+    // Carrega conferência e registro em paralelo
+    const [confRes, regRes] = await Promise.all([
+      fetch(`${SCRIPT_URL}?action=getDeals`).then(r=>r.json()),
+      fetch(`${SCRIPT_URL}?action=getRegistro`).then(r=>r.json())
+    ]);
+
+    // Deals da conferência
+    deals = (confRes.deals || []).map(d => ({ ...d, manual: false }));
+
+    // Registros salvos: mescla estado e adiciona manuais
+    const registros = regRes.registros || [];
+    registros.forEach(r => {
+      const dealId = String(r.DealID || '').trim();
+      if (!dealId) return;
+      // Atualiza estado local
+      registro[dealId] = {
+        titulo:       r.Titulo       || 'ausente',
+        gps:          r.GPS          || 'nao',
+        processo:     r.Processo     || 'pendente',
+        obs:          r.Obs          || '',
+        followUpDias: r.FollowUpDias || '7',
+        dataEntrada:  r.DataEntrada  || ''
+      };
+      // Adiciona manuais que não vieram da conferência
+      if (r.Manual === 'sim' && !deals.find(d => d.dealId === dealId)) {
+        deals.push({
+          dealId,
+          veiculo:      r.Veiculo      || '',
+          vendedor:     r.Vendedor     || '',
+          emplacamento: r.Emplacamento || '',
+          financiamento:r.Financiamento|| '',
+          parcelado:    r.Parcelado    || 'nao',
+          status:'manual', manual:true
+        });
+      }
+    });
+
+    // DataEntrada padrão para quem não tem
+    deals.forEach(d => {
+      if (!registro[d.dealId]) registro[d.dealId] = { dataEntrada: new Date().toISOString().split('T')[0] };
+      if (!registro[d.dealId].dataEntrada) registro[d.dealId].dataEntrada = new Date().toISOString().split('T')[0];
+    });
+
+    saveLocal();
+    renderCards();
+    toast(`${deals.length} deals carregados`);
+  } catch(e) {
+    document.getElementById('card-list').innerHTML =
+      `<div class="empty-state"><div class="big">!</div>Erro ao carregar. Verifique a URL do script.</div>`;
+    toast('Erro ao carregar', 'danger');
+  } finally {
+    setLoading(false);
+  }
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+loadLocal();
+initSetupBanner();
+if (SCRIPT_URL) loadAll();
+</script>
+</body>
+</html>
